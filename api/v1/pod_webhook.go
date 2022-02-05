@@ -29,13 +29,13 @@ func (p *PodMutator) Handle(ctx context.Context, req admission.Request) admissio
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 	sidecar := corev1.Container{
-		Name:            "nginx",
-		Image:           "nginx:1.16",
+		Name:            "sidecar-echo",
+		Image:           "fl64/echo-http:latest",
 		ImagePullPolicy: corev1.PullIfNotPresent,
 		Ports: []corev1.ContainerPort{
 			{
 				Name:          "http",
-				ContainerPort: 80,
+				ContainerPort: 8000,
 			},
 		},
 	}
