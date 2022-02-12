@@ -1,0 +1,8 @@
+{
+  "CN": "mpod.kb.io.default.svc",
+  "hosts": ["mpod.kb.io.default.svc"],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  }
+}
