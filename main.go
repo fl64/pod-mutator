@@ -19,8 +19,8 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	v1 "github.com/fl64/pod-mutator/api/v1"
 	"github.com/fl64/pod-mutator/internal/cfg"
+	"github.com/fl64/pod-mutator/internal/mutator"
 	"os"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
@@ -85,11 +85,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	mutator := &v1.PodMutator{
+	m := &mutator.PodMutator{
 		Client: mgr.GetClient(),
 	}
 	setupLog.Info("register webhook")
-	mgr.GetWebhookServer().Register("/mutate-core-v1-pod", &webhook.Admission{Handler: mutator})
+	mgr.GetWebhookServer().Register("/mutate-core-v1-pod", &webhook.Admission{Handler: m})
 	setupLog.Info("register finished")
 
 	//+kubebuilder:scaffold:builder
