@@ -17,8 +17,10 @@ limitations under the License.
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	v1 "github.com/fl64/pod-mutator/api/v1"
+	"github.com/fl64/pod-mutator/internal/cfg"
 	"os"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
@@ -47,28 +49,35 @@ func init() {
 }
 
 func main() {
-	var metricsAddr string
-	var enableLeaderElection bool
-	var probeAddr string
-	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
-	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
-	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
-		"Enable leader election for controller manager. "+
-			"Enabling this will ensure there is only one active controller manager.")
-	opts := zap.Options{
-		Development: true,
-	}
-	opts.BindFlags(flag.CommandLine)
+	var configPath string
+	flag.StringVar(&configPath, "config-path", "config.yaml", "Path to yaml config file")
 	flag.Parse()
+	config, err := cfg.GetCfg(configPath)
+	if err != nil {
+		setupLog.Error(err, "unable to get config")
+		os.Exit(1)
+		return
+	}
+	opts := zap.Options{
+		Development: config.LoggerCfg.DevMode,
+	}
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
+	configJson, err := json.Marshal(config)
+	if err != nil {
+		setupLog.Error(err, "unable to marshal config")
+		os.Exit(1)
+		return
+	}
+	setupLog.Info(string(configJson))
+
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
-		MetricsBindAddress:     metricsAddr,
+		MetricsBindAddress:     config.MetricAddr,
 		Port:                   9443,
-		HealthProbeBindAddress: probeAddr,
-		LeaderElection:         enableLeaderElection,
+		HealthProbeBindAddress: config.ProbeAddr,
+		LeaderElection:         config.LeaderElect,
 		LeaderElectionID:       "7cb46bcd.my.domain",
 	})
 	if err != nil {
@@ -79,9 +88,9 @@ func main() {
 	mutator := &v1.PodMutator{
 		Client: mgr.GetClient(),
 	}
-	setupLog.Info("Register webhook")
+	setupLog.Info("register webhook")
 	mgr.GetWebhookServer().Register("/mutate-core-v1-pod", &webhook.Admission{Handler: mutator})
-	setupLog.Info("Register finished")
+	setupLog.Info("register finished")
 
 	//+kubebuilder:scaffold:builder
 

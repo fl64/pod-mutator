@@ -3,6 +3,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"github.com/fl64/pod-mutator/internal/cfg"
 	corev1 "k8s.io/api/core/v1"
 	"net/http"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -11,7 +12,7 @@ import (
 )
 
 // log is for logging in this package.
-var podlog = logf.Log.WithName("pod-resource")
+//var podlog = logf.Log.WithName("pod-resource")
 
 // TODO(user): EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 
@@ -19,9 +20,11 @@ var podlog = logf.Log.WithName("pod-resource")
 type PodMutator struct {
 	Client  client.Client
 	decoder *admission.Decoder
+	cfg     *cfg.Cfg
 }
 
 func (p *PodMutator) Handle(ctx context.Context, req admission.Request) admission.Response {
+	podlog := logf.FromContext(ctx).WithName("pod-resource")
 	podlog.Info("Start mutator")
 	pod := &corev1.Pod{}
 	err := p.decoder.Decode(req, pod)
