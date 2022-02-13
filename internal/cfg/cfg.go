@@ -10,19 +10,19 @@ type Resources struct {
 	MEM string `yaml:"MEM"`
 }
 
-type LimReq struct {
+type ReqLim struct {
 	Limits   Resources `yaml:"limits"`
 	Requests Resources `yaml:"requests"`
 }
 
 type MutatorConfig struct {
-	Default  LimReq           `yaml:"default"`
+	Default  ReqLim           `yaml:"default"`
 	Override []ReqLimOverride `yaml:"override"`
 }
 
 type ReqLimOverride struct {
 	ImagePattern string `yaml:"image-pattern"`
-	Resources    LimReq `yaml:"resources"`
+	Resources    ReqLim `yaml:"resources"`
 }
 
 type LoggerCfg struct {
