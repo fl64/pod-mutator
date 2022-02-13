@@ -58,6 +58,7 @@ func main() {
 		os.Exit(1)
 		return
 	}
+
 	opts := zap.Options{
 		Development: config.LoggerCfg.DevMode,
 	}
@@ -87,6 +88,7 @@ func main() {
 
 	m := &mutator.PodMutator{
 		Client: mgr.GetClient(),
+		Cfg:    config,
 	}
 	setupLog.Info("register webhook")
 	mgr.GetWebhookServer().Register("/mutate-core-v1-pod", &webhook.Admission{Handler: m})

@@ -4,20 +4,20 @@ label-selector:
   - aaaaa=asdasd
 log:
   dev: true
-mutator-config:
-  default:
-    limits:
-      CPU: 100m
-      MEM: 200Mi
-    requests:
-      CPU: 100m
-      MEM: 200Mi
-  override:
-  - image-pattern: ".*someimagename.*"
-    resources:
-      limits:
-        CPU: 400m
-        MEM: 4Gi
-      requests:
-        CPU: 200m
-        MEM: 2Gi
+#mutator-config:
+#  default:
+#    limits:
+#      CPU: 100m
+#      MEM: 200Mi
+#    requests:
+#      CPU: 100m
+#      MEM: 200Mi
+#  override:
+#  - image-pattern: ".*someimagename.*"
+#    resources:
+#      limits:
+#        CPU: 400m
+#        MEM: 4Gi
+#      requests:
+#        CPU: 200m
+#        MEM: 2Gi

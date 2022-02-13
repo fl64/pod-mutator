@@ -21,11 +21,14 @@ import (
 type PodMutator struct {
 	Client  client.Client
 	decoder *admission.Decoder
-	cfg     *cfg.Cfg
+	Cfg     *cfg.Cfg
 }
 
 func (p *PodMutator) GetReqLim(image string) (*cfg.ReqLim, error) {
-	for _, img := range p.cfg.MutatorConfig.Override {
+	if p.Cfg.MutatorConfig.Override == nil {
+		return nil, nil
+	}
+	for _, img := range p.Cfg.MutatorConfig.Override {
 		regex, err := regexp.Compile(img.ImagePattern)
 		if err != nil {
 			return nil, err
@@ -39,6 +42,7 @@ func (p *PodMutator) GetReqLim(image string) (*cfg.ReqLim, error) {
 
 func (p *PodMutator) Mutate(ctx context.Context, pod corev1.Pod) (*corev1.Pod, error) {
 	log := logf.FromContext(ctx).WithName("pod-mutation")
+	log.V(1).Info("Starting pod mutation", "pod-name", pod.Name, "pod-namespace", pod.Namespace)
 	for index, container := range pod.Spec.Containers {
 		ReqLim, err := p.GetReqLim(container.Image)
 		if err != nil {
@@ -57,6 +61,9 @@ func (p *PodMutator) Mutate(ctx context.Context, pod corev1.Pod) (*corev1.Pod, e
 
 func (p *PodMutator) Handle(ctx context.Context, req admission.Request) admission.Response {
 	podlog := logf.FromContext(ctx).WithName("pod-resource")
+	admissionJson, _ := json.Marshal(req)
+	podlog.V(1).Info(string(admissionJson))
+
 	podlog.Info("Start mutator")
 	pod := &corev1.Pod{}
 	err := p.decoder.Decode(req, pod)
